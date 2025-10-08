@@ -568,7 +568,7 @@ git clone <repository-url>
 cd mcp-redfish
 
 # Initialize Go module (if not already done)
-go mod init github.com/nokia/mcp-redfish-go
+go mod init github.com/theoriginalaiexplorer/mcp-redfish-go
 
 # Install dependencies
 go mod tidy

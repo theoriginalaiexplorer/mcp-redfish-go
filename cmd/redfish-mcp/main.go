@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/nokia/mcp-redfish-go/pkg/config"
-	"github.com/nokia/mcp-redfish-go/pkg/mcp"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/config"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/mcp"
 )
 
 func main() {

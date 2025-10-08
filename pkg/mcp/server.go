@@ -7,9 +7,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/nokia/mcp-redfish-go/pkg/common"
-	"github.com/nokia/mcp-redfish-go/pkg/config"
-	"github.com/nokia/mcp-redfish-go/pkg/redfish"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/common"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/config"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/redfish"
 )
 
 // Server wraps the MCP server with Redfish-specific functionality

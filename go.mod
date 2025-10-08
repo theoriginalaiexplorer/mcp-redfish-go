@@ -1,4 +1,4 @@
-module github.com/nokia/mcp-redfish-go
+module github.com/theoriginalaiexplorer/mcp-redfish-go
 
 go 1.25.2
 

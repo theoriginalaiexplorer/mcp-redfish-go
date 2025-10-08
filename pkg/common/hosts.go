@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/nokia/mcp-redfish-go/pkg/config"
-	"github.com/nokia/mcp-redfish-go/pkg/redfish"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/config"
+	"github.com/theoriginalaiexplorer/mcp-redfish-go/pkg/redfish"
 )
 
 // HostManager manages both static and discovered Redfish hosts
