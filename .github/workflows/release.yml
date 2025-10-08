@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.25.2'
+
+    - name: Get dependencies
+      run: go mod download
+
+    - name: Build for Linux
+      run: GOOS=linux GOARCH=amd64 go build -o bin/redfish-mcp-linux-amd64 ./cmd/redfish-mcp
+
+    - name: Build for macOS
+      run: GOOS=darwin GOARCH=amd64 go build -o bin/redfish-mcp-darwin-amd64 ./cmd/redfish-mcp
+
+    - name: Build for Windows
+      run: GOOS=windows GOARCH=amd64 go build -o bin/redfish-mcp-windows-amd64.exe ./cmd/redfish-mcp
+
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          bin/redfish-mcp-linux-amd64
+          bin/redfish-mcp-darwin-amd64
+          bin/redfish-mcp-windows-amd64.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
