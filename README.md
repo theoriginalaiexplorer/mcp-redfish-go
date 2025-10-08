@@ -164,6 +164,26 @@ Create a `config.json` file with the complete configuration:
 }
 ```
 
+### Accessing Servers Without SSL Certificates
+
+For development or testing with Redfish servers that have self-signed or invalid SSL certificates, you can skip certificate verification:
+
+**Environment Variable:**
+```bash
+export REDFISH_INSECURE_SKIP_VERIFY=true
+```
+
+**JSON Configuration:**
+```json
+{
+  "redfish": {
+    "insecure_skip_verify": true
+  }
+}
+```
+
+⚠️ **Security Warning:** Only use `insecure_skip_verify` in development or trusted environments. This option disables SSL certificate verification, making connections vulnerable to man-in-the-middle attacks.
+
 ### Environment Variables
 
 | Variable | Description | Default | Required |
