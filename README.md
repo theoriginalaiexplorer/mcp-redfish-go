@@ -1,317 +1,273 @@
-# Redfish MCP Server
+# Redfish MCP Server (Go)
+
+[![Go Version](https://img.shields.io/badge/go-1.25.2-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/theoriginalaiexplorer/mcp-redfish-go)](https://github.com/theoriginalaiexplorer/mcp-redfish-go/releases)
+
+A high-performance MCP (Model Context Protocol) server implementation in Go for interacting with Redfish-enabled infrastructure. This server provides AI agents and applications with natural language access to Redfish API endpoints, enabling intelligent management and monitoring of data center infrastructure.
 
 ## Overview
-The Redfish MCP Server is a **natural language interface** designed for agentic applications to efficiently manage infrastructure that exposes [Redfish API](https://www.dmtf.org/standards/redfish) for this purpose. It integrates seamlessly with **MCP (Model Content Protocol) clients**, enabling AI-driven workflows to interact with structured and unstructured data of the infrastructure. Using this MCP Server, you can ask questions like:
 
-- "List the available infrastructure components"
-- "Get the data of ethernet interfaces of the infrastructure component X"
+The Redfish MCP Server enables AI-driven workflows to interact with Redfish-compliant servers through natural language queries. It provides a standardized interface for accessing hardware information, sensor data, and management capabilities of modern infrastructure components.
 
-## Features
-- **Natural Language Queries**: Enables AI agents to query the data of infrastructure components using natural language.
-- **Seamless MCP Integration**: Works with any **MCP client** for smooth communication.
-- **Full Redfish Support**: It wraps the [Python Redfish library](https://github.com/DMTF/python-redfish-library)
+### Key Features
 
-## Tools
-
-This MCP Server provides tools to manage the data of infrastructure via the Redfish API.
-
-- `list_endpoints` to query the Redfish API endpoints that are configured for the MCP Server.
-- `get_resource_data` to read the data of a specific resource (e.g. System, EthernetInterface, etc.)
+- 🚀 **High Performance**: Native Go implementation with compiled binaries and low memory footprint
+- 🔍 **Redfish API Integration**: Full support for Redfish v1.x API specifications
+- 🤖 **MCP Compatible**: Seamless integration with MCP clients and AI assistants
+- 🔐 **Secure Authentication**: Support for Basic and Session-based authentication
+- 🌐 **Multiple Transports**: stdio, SSE, and streamable-http transport options
+- 🔄 **Concurrent Operations**: Goroutine-based concurrent discovery and requests
+- 📊 **Structured Data Access**: JSON-based resource data retrieval with headers
+- 🛠️ **Extensible Architecture**: Modular design for easy customization
 
 ## Quick Start
 
 ```bash
-# Clone and setup
-git clone <repository-url>
-cd mcp-redfish
-make install  # or 'make dev' for development setup
+# Clone the repository
+git clone https://github.com/theoriginalaiexplorer/mcp-redfish-go.git
+cd mcp-redfish-go
 
-# Option 1: Run with console script (recommended)
-uv run mcp-redfish
-# OR use Makefile shortcut:
-make run-stdio
+# Build the server
+go build -o bin/redfish-mcp ./cmd/redfish-mcp
 
-# Option 2: Run as module (development/CI)
-uv run python -m src.main
+# Configure environment
+export REDFISH_HOSTS='[{"address": "192.168.1.100", "username": "admin", "password": "secret"}]'
+
+# Run the server
+./bin/redfish-mcp
 ```
 
 ## Installation
 
-Follow these instructions to install the server.
+### Prerequisites
 
-```sh
+- Go 1.21 or later
+- Access to Redfish-enabled infrastructure
+
+### Building from Source
+
+```bash
 # Clone the repository
-git clone <repository-url>
-cd mcp-redfish
+git clone https://github.com/theoriginalaiexplorer/mcp-redfish-go.git
+cd mcp-redfish-go
 
-# Install dependencies using uv
-make install
+# Initialize Go module
+go mod tidy
 
-# Or install with development dependencies
-make install-dev
+# Build for your platform
+go build -o bin/redfish-mcp ./cmd/redfish-mcp
+
+# Or build for multiple platforms
+make go-build-all
+```
+
+### Pre-built Binaries
+
+Download the latest release binaries from the [Releases](https://github.com/theoriginalaiexplorer/mcp-redfish-go/releases) page for:
+- Linux (amd64)
+- macOS (amd64)
+- Windows (amd64)
+
+## MCP Tools
+
+The server provides two primary MCP tools for interacting with Redfish infrastructure:
+
+### `list_servers`
+Lists all configured Redfish servers that can be accessed.
+
+**Example usage:**
+```
+List all available Redfish servers
+```
+
+**Response:**
+```json
+{
+  "servers": ["192.168.1.100", "192.168.1.101"]
+}
+```
+
+### `get_resource_data`
+Fetches data from a specific Redfish resource endpoint.
+
+**Parameters:**
+- `url`: The Redfish resource URL (e.g., `https://192.168.1.100/redfish/v1/Systems/1`)
+
+**Example usage:**
+```
+Get the system information from https://192.168.1.100/redfish/v1/Systems/1
+```
+
+**Response:**
+```json
+{
+  "headers": {
+    "content-type": ["application/json"],
+    "etag": ["\"12345\""]
+  },
+  "data": {
+    "@odata.id": "/redfish/v1/Systems/1",
+    "Name": "System1",
+    "Manufacturer": "Example Corp"
+  }
+}
 ```
 
 ## Configuration
 
-The Redfish MCP Server uses environment variables for configuration. The server includes comprehensive validation to ensure all settings are properly configured.
-
-### Environment Variables
-
-| Name                          | Description                                               | Default Value              | Required |
-|-------------------------------|-----------------------------------------------------------|----------------------------|----------|
-| `REDFISH_HOSTS`               | JSON array of Redfish endpoint configurations             | `[{"address":"127.0.0.1"}]` | Yes      |
-| `REDFISH_PORT`                | Default port for Redfish API (used when not specified per-host) | `443`           | No       |
-| `REDFISH_AUTH_METHOD`         | Authentication method: `basic` or `session`              | `session`                  | No       |
-| `REDFISH_USERNAME`            | Default username for authentication                       | `""`                       | No       |
-| `REDFISH_PASSWORD`            | Default password for authentication                       | `""`                       | No       |
-| `REDFISH_SERVER_CA_CERT`      | Path to CA certificate for server verification           | `None`                     | No       |
-| `REDFISH_DISCOVERY_ENABLED`   | Enable automatic endpoint discovery                       | `false`                    | No       |
-| `REDFISH_DISCOVERY_INTERVAL`  | Discovery interval in seconds                             | `30`                       | No       |
-| `MCP_TRANSPORT`               | Transport method: `stdio`, `sse`, or `streamable-http`   | `stdio`                    | No       |
-| `MCP_REDFISH_LOG_LEVEL`       | Logging level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` | `INFO`        | No       |
-
-### REDFISH_HOSTS Configuration
-
-The `REDFISH_HOSTS` environment variable accepts a JSON array of endpoint configurations. Each endpoint can have the following properties:
-
-```json
-[
-  {
-    "address": "192.168.1.100",
-    "port": 443,
-    "username": "admin",
-    "password": "password123",
-    "auth_method": "session",
-    "tls_server_ca_cert": "/path/to/ca-cert.pem"
-  },
-  {
-    "address": "192.168.1.101",
-    "port": 8443,
-    "username": "operator",
-    "password": "secret456",
-    "auth_method": "basic"
-  }
-]
-```
-
-**Per-host properties:**
-- `address` (required): IP address or hostname of the Redfish endpoint
-- `port` (optional): Port number (defaults to global `REDFISH_PORT`)
-- `username` (optional): Username (defaults to global `REDFISH_USERNAME`)
-- `password` (optional): Password (defaults to global `REDFISH_PASSWORD`)
-- `auth_method` (optional): Authentication method (defaults to global `REDFISH_AUTH_METHOD`)
-- `tls_server_ca_cert` (optional): Path to CA certificate (defaults to global `REDFISH_SERVER_CA_CERT`)
+The server supports configuration through environment variables or JSON files. Configuration is validated at startup to ensure proper setup.
 
 ### Configuration Methods
 
-There are several ways to set environment variables:
-
-1. **Using a `.env` File** (Recommended):
-   Place a `.env` file in your project directory with key-value pairs for each environment variable. This is secure and convenient, keeping sensitive data out of version control.
-
+1. **JSON File** (Recommended for complex configurations):
    ```bash
-   # Copy the example configuration
-   cp .env.example .env
-
-   # Edit the .env file with your settings
-   nano .env
+   ./bin/redfish-mcp --config config.json
    ```
 
-   Example `.env` file:
+2. **Environment Variables** (Default):
    ```bash
-   # Redfish endpoint configuration
-   REDFISH_HOSTS='[{"address": "192.168.1.100", "username": "admin", "password": "secret123"}, {"address": "192.168.1.101", "port": 8443}]'
-   REDFISH_AUTH_METHOD=session
-   REDFISH_USERNAME=default_user
-   REDFISH_PASSWORD=default_pass
-
-   # MCP configuration
-   MCP_TRANSPORT=stdio
-   MCP_REDFISH_LOG_LEVEL=INFO
+   export REDFISH_HOSTS='[{"address": "192.168.1.100"}]'
+   ./bin/redfish-mcp
    ```
 
-2. **Setting Variables in the Shell**:
-   Export environment variables directly in your shell before running the application:
-   ```bash
-   export REDFISH_HOSTS='[{"address": "127.0.0.1"}]'
-   export MCP_TRANSPORT="stdio"
-   export MCP_REDFISH_LOG_LEVEL="DEBUG"
-   ```
+### JSON Configuration File
 
-### Configuration Validation
+Create a `config.json` file with the complete configuration:
 
-The server performs comprehensive validation on startup:
+```json
+{
+  "redfish": {
+    "hosts": [
+      {
+        "address": "192.168.1.100",
+        "port": 443,
+        "username": "admin",
+        "password": "secret123",
+        "auth_method": "session",
+        "tls_server_ca_cert": "/path/to/ca-cert.pem"
+      }
+    ],
+    "port": 443,
+    "auth_method": "session",
+    "username": "default_user",
+    "password": "default_pass",
+    "tls_server_ca_cert": "",
+    "discovery_enabled": false,
+    "discovery_interval": 30
+  },
+  "mcp": {
+    "transport": "stdio",
+    "log_level": "INFO"
+  }
+}
+```
 
-- **JSON Syntax**: `REDFISH_HOSTS` must be valid JSON
-- **Required Fields**: Each host must have an `address` field
-- **Port Ranges**: Ports must be between 1 and 65535
-- **Authentication Methods**: Must be `basic` or `session`
-- **Transport Types**: Must be `stdio`, `sse`, or `streamable-http`
-- **Log Levels**: Must be `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`
+### Environment Variables
 
-If validation fails, the server will:
-1. Log detailed error messages
-2. Show a deprecation warning about falling back to legacy parsing
-3. Attempt to continue with basic configuration parsing
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `REDFISH_CONFIG_FILE` | Path to JSON config file | - | No |
+| `REDFISH_HOSTS` | JSON array of host configs | `[{"address":"127.0.0.1"}]` | Yes* |
+| `REDFISH_PORT` | Default Redfish port | `443` | No |
+| `REDFISH_AUTH_METHOD` | Auth method: `basic` or `session` | `session` | No |
+| `REDFISH_USERNAME` | Default username | `""` | No |
+| `REDFISH_PASSWORD` | Default password | `""` | No |
+| `REDFISH_SERVER_CA_CERT` | CA certificate path | `""` | No |
+| `REDFISH_DISCOVERY_ENABLED` | Enable SSDP discovery | `false` | No |
+| `REDFISH_DISCOVERY_INTERVAL` | Discovery interval (seconds) | `30` | No |
+| `MCP_TRANSPORT` | Transport: `stdio`, `sse`, `streamable-http` | `stdio` | No |
+| `MCP_REDFISH_LOG_LEVEL` | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` | `INFO` | No |
 
-**Note**: The legacy fallback is deprecated and will be removed in future versions. Please ensure your configuration follows the validated format.
+*Required when not using JSON config file
+
+### Host Configuration
+
+Each host in `REDFISH_HOSTS` or the JSON file can specify:
+
+- `address` (required): IP or hostname
+- `port` (optional): Port number
+- `username` (optional): Host-specific username
+- `password` (optional): Host-specific password
+- `auth_method` (optional): `basic` or `session`
+- `tls_server_ca_cert` (optional): Custom CA certificate path
+
+### Validation
+
+The server validates configuration on startup and exits with detailed error messages if invalid.
 
 ## Running the Server
 
-The MCP Redfish server supports multiple execution methods:
+### Basic Usage
 
-### Console Script (Recommended)
 ```bash
-# For end users and production deployments
-uv run mcp-redfish
+# Build the server
+go build -o bin/redfish-mcp ./cmd/redfish-mcp
+
+# Set configuration
+export REDFISH_HOSTS='[{"address": "192.168.1.100", "username": "admin", "password": "secret"}]'
+
+# Run with stdio transport (default)
+./bin/redfish-mcp
+
+# Or use a config file
+./bin/redfish-mcp --config redfish-config.json
 ```
 
-### Module Execution
-```bash
-# For development and CI/CD environments
-uv run python -m src.main
-```
+### Transports
 
-### Makefile Targets
-```bash
-# Development shortcuts
-make run-stdio    # Run with stdio transport
-make run-sse      # Run with SSE transport
-make inspect      # Run with MCP Inspector
-```
+The server supports multiple MCP transport mechanisms:
 
-## Transports
-
-The MCP Redfish server supports multiple transport mechanisms for different deployment scenarios:
-
-### stdio Transport (Default)
-Uses standard input/output for communication, suitable for direct MCP client integration and automated testing environments.
+#### stdio Transport (Default)
+Standard input/output communication for direct integration with MCP clients.
 
 ```bash
-# Set transport mode
 export MCP_TRANSPORT="stdio"
-
-# Console script execution
-uv run mcp-redfish
-
-# Module execution (for CI/CD)
-uv run python -m src.main
+./bin/redfish-mcp
 ```
 
-### SSE Transport (Server-Sent Events)
-Enables network-based communication, allowing remote MCP clients to connect over HTTP.
+#### SSE Transport (Server-Sent Events)
+Network-based communication over HTTP for remote clients.
 
 ```bash
-# Configure SSE transport
 export MCP_TRANSPORT="sse"
-
-# Start server - multiple options:
-make run-sse                                    # Makefile shortcut (recommended)
-uv run mcp-redfish --transport sse --port 8080  # Manual console script
-uv run python -m src.main --transport sse --port 8080  # Manual module execution
+./bin/redfish-mcp
+# Server will be available at http://localhost:8000/sse
 ```
 
-Test the SSE server:
-```commandline
-curl -i http://127.0.0.1:8080/sse
-HTTP/1.1 200 OK
-```
-
-### streamable-http Transport
-Another network transport option for specific MCP client implementations.
+#### streamable-http Transport
+Alternative HTTP-based transport for specific MCP implementations.
 
 ```bash
 export MCP_TRANSPORT="streamable-http"
-make run-streamable-http    # Makefile shortcut (recommended)
-# OR
-uv run mcp-redfish         # Manual execution
+./bin/redfish-mcp
 ```
 
-Integrate with your favorite tool or client. The VS Code configuration for GitHub Copilot is:
+### Makefile Targets
 
-```commandline
-"mcp": {
-    "servers": {
-        "redfish-mcp": {
-            "type": "sse",
-            "url": "http://127.0.0.1:8000/sse"
-        },
-    }
-},
+Use the provided Makefile for common operations:
+
+```bash
+make go-build      # Build the binary
+make go-run        # Run the server
+make go-test       # Run tests
+make go-fmt        # Format code
+make go-vet        # Lint code
 ```
 
-## Integration with Claude Desktop
+## Integration with MCP Clients
 
-### Manual configuration
+### Claude Desktop
 
-You can configure Claude Desktop to use this MCP Server.
+Add the server to your `claude_desktop_config.json`:
 
-1. Retrieve your `uv` command full path (e.g. `which uv`)
-2. Edit the `claude_desktop_config.json` configuration file
-   - on a MacOS, at `~/Library/Application\ Support/Claude/`
-
-```commandline
+```json
 {
-    "mcpServers": {
-        "redfish": {
-            "command": "<full_path_uv_command>",
-            "args": [
-                "--directory",
-                "<your_mcp_server_directory>",
-                "run",
-                "mcp-redfish"
-            ],
-            "env": {
-                "REDFISH_HOSTS": "[{\"address\": \"192.168.1.100\", \"username\": \"admin\", \"password\": \"secret123\"}]",
-                "REDFISH_AUTH_METHOD": "session",
-                "MCP_TRANSPORT": "stdio",
-                "MCP_REDFISH_LOG_LEVEL": "INFO"
-            }
-        }
-    }
-}
-```
-
-**Note**: You can also use module execution by changing the args to `["run", "python", "-m", "src.main"]` if needed for development or troubleshooting.
-
-### Troubleshooting
-
-You can troubleshoot problems by tailing the log file.
-
-```commandline
-tail -f ~/Library/Logs/Claude/mcp-server-redfish.log
-```
-
-## Integration with VS Code
-
-To use the Redfish MCP Server with VS Code, you need:
-
-1. Enable the [agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode) tools. Add the following to your `settings.json`:
-
-```commandline
-{
-  "chat.agent.enabled": true
-}
-```
-
-2. Add the Redfish MCP Server configuration to your `mcp.json` or `settings.json`:
-
-```commandline
-// Example .vscode/mcp.json
-{
-  "servers": {
+  "mcpServers": {
     "redfish": {
-      "type": "stdio",
-      "command": "<full_path_uv_command>",
-      "args": [
-        "--directory",
-        "<your_mcp_server_directory>",
-        "run",
-        "mcp-redfish"
-      ],
+      "command": "/path/to/bin/redfish-mcp",
       "env": {
         "REDFISH_HOSTS": "[{\"address\": \"192.168.1.100\", \"username\": \"admin\", \"password\": \"secret123\"}]",
-        "REDFISH_AUTH_METHOD": "session",
         "MCP_TRANSPORT": "stdio"
       }
     }
@@ -319,23 +275,18 @@ To use the Redfish MCP Server with VS Code, you need:
 }
 ```
 
-```commandline
-// Example settings.json
+### VS Code with GitHub Copilot
+
+Configure in your VS Code settings or `.vscode/mcp.json`:
+
+```json
 {
   "mcp": {
     "servers": {
       "redfish": {
-        "type": "stdio",
-        "command": "<full_path_uv_command>",
-        "args": [
-          "--directory",
-          "<your_mcp_server_directory>",
-          "run",
-          "mcp-redfish"
-        ],
+        "command": "/path/to/bin/redfish-mcp",
         "env": {
           "REDFISH_HOSTS": "[{\"address\": \"192.168.1.100\", \"username\": \"admin\", \"password\": \"secret123\"}]",
-          "REDFISH_AUTH_METHOD": "session",
           "MCP_TRANSPORT": "stdio"
         }
       }
@@ -344,84 +295,50 @@ To use the Redfish MCP Server with VS Code, you need:
 }
 ```
 
-**Note**: For development or troubleshooting, you can use module execution by changing the last arg from `"mcp-redfish"` to `"python", "-m", "src.main"`.
+### MCP Inspector
+
+Test the server with the MCP Inspector:
+
+```bash
+npx @modelcontextprotocol/inspector /path/to/bin/redfish-mcp
+```
 
 For more information, see the [VS Code documentation](https://code.visualstudio.com/docs/copilot/chat/mcp-servers).
 
 
 ## Testing
 
-### Interactive Testing
+### Unit Tests
 
-You can use the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) for visual debugging of this MCP Server.
-
-```sh
-# Using console script (recommended)
-npx @modelcontextprotocol/inspector uv run mcp-redfish
-
-# Using module execution (for development)
-npx @modelcontextprotocol/inspector uv run python -m src.main
-
-# Or use the Makefile shortcut
-make inspect
-```
-
-### End-to-End Testing
-
-For comprehensive testing, including testing against a real Redfish API, the project includes an e2e testing environment using the DMTF Redfish Interface Emulator:
+Run the Go test suite:
 
 ```bash
-# Quick start - run all e2e tests
-make e2e-test
+# Run all tests
+go test ./...
 
-# Or step by step:
-make e2e-emulator-setup    # Set up emulator and certificates
-make e2e-emulator-start    # Start Redfish Interface Emulator
-make e2e-test-framework    # Run comprehensive tests with Python framework (recommended)
-make e2e-emulator-stop     # Stop emulator
+# Run with race detection
+go test -race ./...
+
+# Run with coverage
+go test -cover ./...
+
+# Using Makefile
+make go-test
 ```
 
-> **Note**: The old target names (e.g., `make e2e-setup`, `make e2e-start`) are still supported for backward compatibility, but the new emulator-specific names are recommended for clarity.
+### MCP Inspector
 
-The e2e tests provide:
-- **Redfish Interface Emulator**: Simulated Redfish API for testing
-- **SSL/TLS Support**: Self-signed certificates for HTTPS testing
-- **CI/CD Integration**: Automated testing on pull requests
-- **Local Development**: Full testing environment on your machine
-
-For detailed e2e testing documentation, see [E2E_TESTING.md](./E2E_TESTING.md).
-
-### Container Runtime Support
-
-The project supports both Docker and Podman as container runtimes:
-
-- **Auto-Detection**: Automatically detects and uses available container runtime
-- **Docker**: Uses optimized Dockerfile with BuildKit cache mounts when available
-- **Podman**: Uses compatible Dockerfile without cache mounts for broader compatibility
-- **Manual Override**: Force specific runtime with `CONTAINER_RUNTIME` environment variable
+Test the server interactively with the MCP Inspector:
 
 ```bash
-# Auto-detect (default)
-make container-build
-
-# Force Docker
-CONTAINER_RUNTIME=docker make container-build
-
-# Force Podman
-CONTAINER_RUNTIME=podman make container-build
-# Or use convenience target
-make podman-build
+# Build and test
+go build -o bin/redfish-mcp ./cmd/redfish-mcp
+npx @modelcontextprotocol/inspector ./bin/redfish-mcp
 ```
 
-### Unit Testing
+### Integration Testing
 
-Run the standard test suite:
-
-```bash
-make test        # Run tests
-make test-cov    # Run with coverage
-make check       # Quick lint + test
-```
+The server can be tested against real Redfish hardware or emulators. Ensure your `REDFISH_HOSTS` configuration points to accessible endpoints.
 
 ## Example Use Cases
 - **AI Assistants**: Enable LLMs to fetch infrastructure data via Redfish API.
@@ -430,181 +347,93 @@ make check       # Quick lint + test
 ## Development
 
 ### Prerequisites
-- Python 3.9+ (Python 3.13.5 recommended)
-- [uv](https://docs.astral.sh/uv/) for package management
+
+- Go 1.21 or later
+- Git
 
 ### Setup
+
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd mcp-redfish
-
-# Install development environment (includes dependencies + pre-commit hooks)
-make dev
-
-# Or install components separately:
-make install-dev    # Install development dependencies
-make pre-commit-install  # Set up pre-commit hooks
-```
-
-### Development Workflow
-The project includes a comprehensive Makefile with 42+ targets for development:
-
-```bash
-# Code quality
-make lint          # Run ruff linting
-make format        # Format code with ruff
-make type-check    # Run MyPy type checking
-make test          # Run pytest tests
-make security      # Run bandit security scan
-
-# Development servers
-make run-stdio     # Run with stdio transport
-make run-sse       # Run with SSE transport
-make run-streamable-http  # Run with streamable-http transport
-make inspect       # Run with MCP Inspector
-
-# All-in-one commands
-make all-checks    # Run full quality suite (lint, format, type-check, security, pre-commit)
-make check         # Quick check: linting and tests only
-make pre-commit-run # Run all pre-commit checks
-```
-
-### Code Organization
-```
-src/
-├── main.py              # Entry point and console script
-├── common/              # Shared utilities
-│   ├── __init__.py     # Package exports
-│   ├── config.py       # Configuration management
-│   └── hosts.py        # Host discovery and validation
-└── tools/              # MCP tool implementations
-    ├── __init__.py
-    ├── redfish_tools.py # Core Redfish operations
-    └── tool_registry.py # Tool registration
-```
-
-### Execution Patterns
-- **Console Script**: `uv run mcp-redfish` (recommended for users)
-- **Module Execution**: `uv run python -m src.main` (for development/CI)
-- **Direct Python**: `python src/main.py` (basic execution)
-
-### Testing
-```bash
-# Run all tests
-make test
-
-# Run with coverage
-make test-cov
-
-# Run specific test files (manual uv command needed)
-uv run pytest tests/test_config.py -v
-
-# Integration testing with MCP Inspector
-make inspect
-```
-
-### Pre-commit Hooks
-The project uses pre-commit hooks for code quality:
-- **ruff**: Linting and formatting
-- **mypy**: Type checking
-- **Custom checks**: Import sorting, trailing whitespace
-
-### Type System
-- Uses modern Python 3.9+ built-in types (`dict`, `list`) instead of `typing.Dict`, `typing.List`
-- Comprehensive type annotations with MyPy strict mode
-- Return type annotations for all functions
-
-For more details, see the Makefile targets: `make help`
-
-## Go Implementation
-
-A Go-based implementation of the Redfish MCP Server is available, providing the same functionality with improved performance and concurrency.
-
-**Status**: ✅ **Ready for use**
-
-The Go implementation offers:
-- Native compiled performance with lower memory usage
-- Concurrent SSDP discovery using goroutines
-- Type-safe configuration and error handling
-- Single binary deployment with no runtime dependencies
-
-See [README_GO.md](./README_GO.md) for detailed Go implementation documentation.
-
-### Go Implementation Features
-- **Native Performance**: Compiled Go binary with better memory usage and CPU performance
-- **Concurrent Discovery**: Goroutine-based SSDP discovery for better scalability
-- **Type Safety**: Strong typing with compile-time guarantees
-- **Simplified Deployment**: Single binary deployment with no runtime dependencies
-
-### Go Project Structure
-```
-cmd/redfish-mcp/
-├── main.go                 # Entry point
-pkg/
-├── config/
-│   ├── config.go           # Configuration structs and validation
-│   └── env.go              # Environment variable parsing
-├── redfish/
-│   ├── client.go           # Redfish HTTP client with retry logic
-│   ├── discovery.go        # SSDP discovery implementation
-│   └── types.go            # Redfish-specific types
-├── mcp/
-│   ├── server.go           # MCP server setup
-│   ├── tools.go            # MCP tool implementations
-│   └── handlers.go         # Tool handlers
-└── common/
-    ├── hosts.go            # Host management
-    └── logging.go          # Logging utilities
-```
-
-### Building the Go Version
-```bash
-# Install Go 1.21+
-go version
-
-# Clone and navigate to the repository
-git clone <repository-url>
-cd mcp-redfish
-
-# Initialize Go module (if not already done)
-go mod init github.com/theoriginalaiexplorer/mcp-redfish-go
+git clone https://github.com/theoriginalaiexplorer/mcp-redfish-go.git
+cd mcp-redfish-go
 
 # Install dependencies
 go mod tidy
 
-# Build the binary
-go build -o bin/redfish-mcp ./cmd/redfish-mcp
-
-# Run the server
-./bin/redfish-mcp
+# Build
+go build ./cmd/redfish-mcp
 ```
 
-### Go Configuration
-The Go implementation uses the same environment variables as the Python version:
+### Development Workflow
 
 ```bash
-export REDFISH_HOSTS='[{"address": "192.168.1.100", "username": "admin", "password": "secret123"}]'
-export MCP_TRANSPORT="stdio"
-./bin/redfish-mcp
-```
-
-### Go Development
-```bash
-# Run tests
-go test ./...
-
-# Run with race detection
-go test -race ./...
-
 # Format code
 go fmt ./...
 
 # Lint code
 go vet ./...
 
-# Build for multiple platforms
-GOOS=linux GOARCH=amd64 go build -o bin/redfish-mcp-linux-amd64 ./cmd/redfish-mcp
-GOOS=darwin GOARCH=amd64 go build -o bin/redfish-mcp-darwin-amd64 ./cmd/redfish-mcp
-GOOS=windows GOARCH=amd64 go build -o bin/redfish-mcp-windows-amd64.exe ./cmd/redfish-mcp
+# Run tests
+go test ./...
+
+# Build for development
+go build -o bin/redfish-mcp ./cmd/redfish-mcp
+
+# Run the server
+./bin/redfish-mcp
 ```
+
+### Project Structure
+
+```
+.
+├── cmd/redfish-mcp/          # Main application
+│   └── main.go              # Entry point
+├── pkg/                     # Go packages
+│   ├── config/              # Configuration management
+│   │   ├── config.go        # Config structs and validation
+│   │   ├── env.go           # Environment parsing
+│   │   └── config_test.go   # Unit tests
+│   ├── redfish/             # Redfish client and discovery
+│   │   ├── client.go        # HTTP client with retry logic
+│   │   ├── discovery.go     # SSDP discovery
+│   │   └── types.go         # Type definitions
+│   ├── mcp/                 # MCP server implementation
+│   │   └── server.go        # MCP server setup and tools
+│   └── common/              # Shared utilities
+│       └── hosts.go         # Host management
+├── .github/workflows/       # CI/CD workflows
+│   └── release.yml          # Release automation
+├── Makefile                 # Build and development tasks
+└── README.md               # This file
+```
+
+### Code Quality
+
+- **Formatting**: `go fmt` for consistent formatting
+- **Linting**: `go vet` for static analysis
+- **Testing**: Comprehensive unit tests with `go test`
+- **Modules**: Go modules for dependency management
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with tests
+4. Run `go test ./...` and `go vet ./...`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Acknowledgments
+
+- [Model Context Protocol](https://modelcontextprotocol.io/) for the protocol specification
+- [DMTF Redfish](https://www.dmtf.org/standards/redfish) for the API standard
+- Go community for the excellent tooling and libraries
