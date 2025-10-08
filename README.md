@@ -153,6 +153,7 @@ Create a `config.json` file with the complete configuration:
     "username": "default_user",
     "password": "default_pass",
     "tls_server_ca_cert": "",
+    "insecure_skip_verify": false,
     "discovery_enabled": false,
     "discovery_interval": 30
   },
@@ -174,6 +175,7 @@ Create a `config.json` file with the complete configuration:
 | `REDFISH_USERNAME` | Default username | `""` | No |
 | `REDFISH_PASSWORD` | Default password | `""` | No |
 | `REDFISH_SERVER_CA_CERT` | CA certificate path | `""` | No |
+| `REDFISH_INSECURE_SKIP_VERIFY` | Skip SSL certificate verification | `false` | No |
 | `REDFISH_DISCOVERY_ENABLED` | Enable SSDP discovery | `false` | No |
 | `REDFISH_DISCOVERY_INTERVAL` | Discovery interval (seconds) | `30` | No |
 | `MCP_TRANSPORT` | Transport: `stdio`, `sse`, `streamable-http` | `stdio` | No |

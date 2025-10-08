@@ -111,14 +111,15 @@ func loadRedfishConfig() (*RedfishConfig, error) {
 	}
 
 	config := &RedfishConfig{
-		Hosts:             hosts,
-		Port:              port,
-		AuthMethod:        getEnv("REDFISH_AUTH_METHOD", string(AuthMethodSession)),
-		Username:          getEnv("REDFISH_USERNAME", ""),
-		Password:          getEnv("REDFISH_PASSWORD", ""),
-		TLSServerCACert:   getEnv("REDFISH_SERVER_CA_CERT", ""),
-		DiscoveryEnabled:  getEnvBool("REDFISH_DISCOVERY_ENABLED", false),
-		DiscoveryInterval: discoveryInterval,
+		Hosts:              hosts,
+		Port:               port,
+		AuthMethod:         getEnv("REDFISH_AUTH_METHOD", string(AuthMethodSession)),
+		Username:           getEnv("REDFISH_USERNAME", ""),
+		Password:           getEnv("REDFISH_PASSWORD", ""),
+		TLSServerCACert:    getEnv("REDFISH_SERVER_CA_CERT", ""),
+		InsecureSkipVerify: getEnvBool("REDFISH_INSECURE_SKIP_VERIFY", false),
+		DiscoveryEnabled:   getEnvBool("REDFISH_DISCOVERY_ENABLED", false),
+		DiscoveryInterval:  discoveryInterval,
 	}
 
 	return config, nil

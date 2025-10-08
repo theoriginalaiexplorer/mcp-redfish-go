@@ -54,14 +54,15 @@ func (h *HostConfig) Validate() error {
 
 // RedfishConfig represents complete Redfish configuration
 type RedfishConfig struct {
-	Hosts             []HostConfig `json:"hosts"`
-	Port              int          `json:"port"`
-	AuthMethod        string       `json:"auth_method"`
-	Username          string       `json:"username"`
-	Password          string       `json:"password"`
-	TLSServerCACert   string       `json:"tls_server_ca_cert,omitempty"`
-	DiscoveryEnabled  bool         `json:"discovery_enabled"`
-	DiscoveryInterval int          `json:"discovery_interval"`
+	Hosts              []HostConfig `json:"hosts"`
+	Port               int          `json:"port"`
+	AuthMethod         string       `json:"auth_method"`
+	Username           string       `json:"username"`
+	Password           string       `json:"password"`
+	TLSServerCACert    string       `json:"tls_server_ca_cert,omitempty"`
+	InsecureSkipVerify bool         `json:"insecure_skip_verify"`
+	DiscoveryEnabled   bool         `json:"discovery_enabled"`
+	DiscoveryInterval  int          `json:"discovery_interval"`
 }
 
 // Validate validates the Redfish configuration

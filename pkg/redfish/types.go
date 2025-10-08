@@ -21,29 +21,31 @@ const (
 
 // ClientConfig represents configuration for a Redfish client
 type ClientConfig struct {
-	Address         string
-	Port            int
-	Username        string
-	Password        string
-	AuthMethod      AuthMethod
-	TLSServerCACert string
-	MaxRetries      int
-	InitialDelay    time.Duration
-	MaxDelay        time.Duration
-	BackoffFactor   float64
-	Jitter          bool
+	Address            string
+	Port               int
+	Username           string
+	Password           string
+	AuthMethod         AuthMethod
+	TLSServerCACert    string
+	InsecureSkipVerify bool
+	MaxRetries         int
+	InitialDelay       time.Duration
+	MaxDelay           time.Duration
+	BackoffFactor      float64
+	Jitter             bool
 }
 
 // DefaultClientConfig returns default client configuration
 func DefaultClientConfig() *ClientConfig {
 	return &ClientConfig{
-		Port:          443,
-		AuthMethod:    AuthMethodSession,
-		MaxRetries:    3,
-		InitialDelay:  time.Second,
-		MaxDelay:      60 * time.Second,
-		BackoffFactor: 2.0,
-		Jitter:        true,
+		Port:               443,
+		AuthMethod:         AuthMethodSession,
+		InsecureSkipVerify: false,
+		MaxRetries:         3,
+		InitialDelay:       time.Second,
+		MaxDelay:           60 * time.Second,
+		BackoffFactor:      2.0,
+		Jitter:             true,
 	}
 }
 

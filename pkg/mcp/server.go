@@ -208,6 +208,8 @@ func (s *Server) createClientConfig(hostConfig config.HostConfig) *redfish.Clien
 		config.TLSServerCACert = s.config.Redfish.TLSServerCACert
 	}
 
+	config.InsecureSkipVerify = s.config.Redfish.InsecureSkipVerify
+
 	return config
 }
 
